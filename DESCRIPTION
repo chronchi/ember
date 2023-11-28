@@ -1,0 +1,24 @@
+Package: EMBER
+Type: Package
+Title: molecular EMBeddER
+Version: 0.1.0
+Author: Carlos Ronchi
+Maintainer: Carlos Ronchi <carloshvronchi@gmail.com>
+Description: A framework for precision medicine in breast cancer. Calculates
+     molecular subtype and provides pathway scores for samples individually.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 2.10)
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Imports: 
+    dplyr,
+    ggplot2,
+    msigdbr,
+    singscore,
+    SummarizedExperiment
+RoxygenNote: 7.2.3

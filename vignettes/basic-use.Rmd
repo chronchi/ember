@@ -1,0 +1,146 @@
+---
+title: "Tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message = FALSE}
+library(EMBER)
+
+library(dplyr)
+library(ggplot2)
+
+library(SummarizedExperiment)
+library(msigdbr)
+```
+
+## Get PCA coordinates and plot
+
+```{r}
+# first calculate the normalization. by default it uses the 
+# small PCA model
+abim_100_normalized <- EMBER::get_final_ranking_values(
+    sum_exp = abim_100, assay_to_use = "log2fpkm", 
+    most_variable_genes = "small"
+)
+
+# calculate the embedding for the abim
+abim_100_normalized <- EMBER::get_pca_coordinates(
+    abim_100_normalized, which_pca = "small"
+)
+
+
+# get now the base plot so we can overlay the samples into the 
+# embedding
+base_plot <- EMBER::get_base_plot()
+
+# plot on top of the base plot to have an idea where the samples
+p <- base_plot + 
+    ggplot2::geom_point(
+        colData(abim_100_normalized) %>%
+            data.frame,
+        mapping = aes(x = PC3, y = PC4, color = pam50),
+        size = 5,
+        alpha = 1,
+        shape = 17
+    )
+```
+
+```{r}
+p
+```
+
+All the samples are overlapping. We can see how close they 
+are to the other cohorts in the space of batch effects.
+
+```{r}
+base_plot_batch <- EMBER::get_base_plot(
+    x = "PC1", 
+    y = "PC2",
+    color = "cohort"
+)
+
+# plot on top of the base plot to have an idea where the samples
+p_batch <- base_plot_batch + 
+    ggplot2::geom_point(
+        colData(abim_100_normalized) %>%
+            data.frame,
+        mapping = aes(x = PC1, y = PC2),
+        color = "black",
+        size = 3,
+        alpha = 1,
+        shape = 17
+    )
+
+p_batch
+```
+
+Makes sense since ABiM is a Swedish cohort that was obtained in a
+similar way to SCANB.
+
+## Regress data and calculate scores
+
+Next step is to regress the data so we can calculate their scores.
+We create a new summarized experiment that will contain the regressed
+data, since only 8253 genes are regressed.
+
+```{r}
+# we first get the gene sets to calculate the scores
+gene_sets <- EMBER::get_gene_sets(species = "Homo sapiens", category = "H")
+
+abim_100_regressed <- EMBER::get_regressed_data(
+    sum_exp = abim_100, assay_to_use = "log2fpkm"
+) %>%
+    # calculate the scores for the regressed data
+    EMBER::get_scores_regressed(sum_exp = ., gene_sets = gene_sets)
+```
+
+If you check now the column names, there are 50 new columns with the
+names "regressed_" and the name of the pathway. Moreover, one can also
+check the regressed gene expression levels by checking the assay 
+"regressed".
+
+```{r}
+hist(
+        SummarizedExperiment::assay(abim_100_regressed, "regressed")["ESR1", ], 
+        xlab = "Regressed ESR1 levels",
+        main = "Histogram"
+    )
+```
+
+## Comparing conditions
+
+We can now compare the different conditions based on the pathway
+scores obtained. More specifically, we compare ER status among the ABiM
+100 samples.
+
+```{r}
+colData(abim_100_regressed) %>%
+    data.frame %>%
+    dplyr::filter(!is.na(ER)) %>%
+    ggplot2::ggplot(aes(
+        x = ER, 
+        y = regressed_HALLMARK_ESTROGEN_RESPONSE_EARLY,
+        color = ER
+    )) + 
+    ggplot2::geom_jitter() + 
+    ggplot2::geom_boxplot(alpha = 0.5, outlier.shape = NA) + 
+    ggplot2::labs(
+        x = "ER status", 
+        y = "Estrogen early",
+        title = "Scores calculated on regressed data"
+    ) + 
+    ggplot2::theme_bw(base_size = 15)
+```
+
+
