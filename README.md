@@ -1,22 +1,25 @@
-# MEMBER
+# ember
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-A new framework for precision medicine in breast cancer. Provides
-functions for intrinsic molecular subtype without the need to set a 
-threshold.
+A framework for precision medicine in breast cancer. Calculates molecular subtype and provides pathway scores for samples individually.
 
 ## Installation
 
-You can install the development version of MEMBER like so:
+To install the package run R and the following lines:
 
 ``` r
-# try either
-devtools::install_github("chronchi/MEMBER")
+if (!require("devtools", quietly = TRUE))
+    install.packages("devtools")
 
-# or try to download this repository and run in the root of the 
-# directory
-devtools::install()
+devtools::install_github("chronchi/ember")
 ```
 
+## Basic usage 
+
+Check the tutorial page at [chronchi.github.io/ember/](https://chronchi.github.io/ember/ "Tutorial for ember")
+
+## Citation
+
+To be included here.
