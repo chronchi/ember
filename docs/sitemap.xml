@@ -1,51 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>/articles/basic-use.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/avg_ranking.html</loc>
-  </url>
-  <url>
-    <loc>/reference/calculate_norm_ranks.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_base_plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_final_ranking_values.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_gene_sets.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_pca_coordinates.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_regressed_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_scores_regressed.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/prepare_data_normalization.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://chronchi.github.io/ember/404.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/LICENSE.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/articles/basic-use.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/articles/index.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/authors.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/index.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/avg_ranking.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/calculate_norm_ranks.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/get_base_plot.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/get_final_ranking_values.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/get_gene_sets.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/get_pca_coordinates.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/get_regressed_data.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/get_scores_regressed.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/index.html</loc></url>
+<url><loc>https://chronchi.github.io/ember/reference/prepare_data_normalization.html</loc></url>
 </urlset>
+
