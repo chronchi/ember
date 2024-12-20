@@ -3,7 +3,8 @@ pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
   basic-use: basic-use.html
-last_built: 2024-08-26T10:16Z
+  run-docker-analysis: run-docker-analysis.html
+last_built: 2024-12-20T21:45Z
 urls:
   reference: https://chronchi.github.io/ember/reference
   article: https://chronchi.github.io/ember/articles

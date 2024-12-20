@@ -1,0 +1,230 @@
+---
+title: "Analysing TCGA, METABRIC and SCAN-B"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Analysing TCGA, METABRIC and SCAN-B}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this vignette we provide a tutorial along with a docker image 
+containing the processed TCGA, SCAN-B
+and METABRIC datasets. This allows us to have an easy and reproducible analysis.
+
+## What is Docker
+
+Docker is a tool that helps scientists, including those with 
+little programming experience, set up and share computational 
+environments easily and consistently. Think of it as a "container" for 
+your work, like a virtual lab bench that holds all the tools, software,
+and data you need to run your analysis.
+
+## Installing Docker 
+
+For **Windows** follow the instructions in this page:
+
+> https://docs.docker.com/desktop/
+
+For **Linux** follow the instructions in this page:
+
+> https://docs.docker.com/engine/install/
+
+For **Mac** follow the instructions in this page:
+
+> https://docs.docker.com/desktop/
+
+For Windows and Mac you can use the docker desktop, whereas for Linux
+you can use the engine in the terminal, as explained in the
+links above.
+
+## Download EMBER image
+
+The EMBER image contains all the necessary data and initial R packages
+to perform a basic analysis. In Docker, an image is like a blueprint 
+that defines everything needed to run a program, including the 
+operating system, software (e.g., R), and required packages.
+
+Download the image from the link below.
+> https://hub.docker.com/r/chronchi/ember_docker
+
+If using Docker Desktop, you can download the image directly
+from the application using the search function and typing in
+`chronchi/ember_docker`.
+
+## Running a container
+
+A container is a running instance of a Docker image, 
+providing a lightweight, isolated environment where your program or analysis 
+executes. Note here that whenever one closes a container, everything 
+saved and executed inside the container is lost. In order to avoid
+this we need to set up a volume to save the results in a local folder
+in your computer/server.
+
+After downloading the image in the docker desktop, you can run
+a new container by going to the Images tab and clicking in the play
+button below Actions, associated with the respective image. Before you
+confirm, we need to set up the volumes.
+
+## Setting up volumes
+
+The volumes are paths to folders in your local folders and correspond
+to paths inside the container. Here we will set up three volumes, 
+a `scripts`, `results` and `docs` folder. Everything saved within these
+folders will be available locally. In our case we create a folder locally
+for the analysis and inside it the three afore mentioned folders.
+
+Then, for the container path you can simply add `/home/rstudio/scripts`, 
+`/home/rstudio/results` and `/home/rstudio/docs` respectively in the 
+container paths. 
+
+## Ports
+
+We set up the host port 8000. This will be the port used to run the
+Rstudio server.
+
+## Running your Rstudio session
+
+Once everything is set, you can finally run your container and the
+Rstudio can be opened at: 
+
+> http://localhost:8000/
+
+If you used the port `8000`. If you used any other port make sure to change
+the number `8000`. If you didn't write down anything in the port box,
+the default is `8787`.
+
+## Logging in
+
+The username is `rstudio` and the password can be found in the Docker
+Desktop app in red within a sentence that says
+*The password is set to random\_password*, 
+where *random\_password* corresponds to the randomly generated password.
+
+## Analysing the data
+
+From now on this is like using Rstudio locally, but with the data already
+available within the folder `/home/rstudio/data` and several packages
+installed, including EMBER. We just run an example where we use TCGA,
+METABRIC and SCAN-B to visualize the invasive lobular cancer samples
+in the 1000-genes EMBER embedding.
+
+From here on you can create a file called analysis.qmd within the scripts 
+folder and we will run the code in that file. 
+
+### Load the data
+
+There are multiple datasets available. Below we explain what these datasets
+are precisely.
+
+- `metabric_embedded.rds`, `tcga_embedded.rds` and `scanb_embedded.rds`: 
+These are the datasets processed for the EMBER embedding. Use them to visualize
+the PC3/PC4 biplots colored by whatever metadata is available in each dataset.
+- `metabric.rds`, `tcga.rds`, `scanb.rds`: These are the datasets with batch
+effects removed and the hallmark pathway scores calculated. Use them 
+if you want to further calculate other pathway scores using the 
+function `ember::get_scores_regressed`.
+- `original_datasets.rds`: This is a single list containing all the original
+datasets before doing any processing with EMBER.
+
+To load any of these files, use the `readRDS` function available on base R.
+For example:
+
+```r
+tcga_embedded <- readRDS("data/tcga_embedded.rds")
+```
+
+### Plotting ILC samples
+
+In order to plot the ILC TCGA samples on top of all samples, colored
+by their respective molecular subtype, we can use the following code.
+The molecular subtype is available in the column `molecular_subtype` and
+the histopathological status of the tumors in the column `primary_diagnosis`. 
+
+```r
+library(dplyr)
+library(ggplot2)
+
+# Define a function to color code consistently the different molecular
+# subtypes. We assume the dataframe has a column named pam50 with the 
+# 6 different molecular subtypes shown below.
+get_colors_mol_sub <- function(df){
+  
+  # ggplot2 default palette scheme
+  n <- 6
+  hues <- seq(15, 375, length = n + 1)
+  colors_mol_sub <- hcl(h = hues, l = 65, c = 100)[1:n]    
+  names(colors_mol_sub) <- c(
+    "basal",
+    "her2", 
+    "lumb", 
+    "luma", 
+    "normal",
+    "claudin-low"
+  )
+  
+  # we only use the colors available in the dataframe, otherwise
+  # it shows all categories when it is not actually necessary
+  selected_colors <- intersect(
+    names(colors_mol_sub), 
+    unique(df$pam50)
+  )
+  colors_mol_sub[selected_colors]
+}
+
+# Named vector that will be used to automatically convert the 
+# names of the molecular subtypes in the legend.
+mol_subs <- c(
+  "basal" = "Basal-like", 
+  "her2"= "HER2-enriched", 
+  "lumb" = "LumB", 
+  "luma" = "LumA", 
+  "normal" = "Normal-like",
+  "claudin-low" = "Claudin-low"
+)
+
+# Get the base plot containing all samples, from which the ILC samples
+# will be overlayed on.
+p <- ember::get_base_plot()
+
+# Plot ILC samples on top of the embedded samples from SCAN-B, TCGA and
+# METABRIC
+final_plot <- p +
+  ggplot2::geom_point(
+    tcga_embedded %>%
+      colData %>%
+      data.frame %>%
+      dplyr::filter(
+        primary_diagnosis %in% c("Lobular carcinoma, NOS")
+      ),
+    mapping = aes(x = PC3, y = PC4),
+    size = 2,
+    shape = 24,
+    fill = "black",
+    alpha = 1
+  ) + 
+  ggplot2::theme_bw(base_size = 15) +
+  ggplot2::scale_color_manual(
+    values = c(get_colors_mol_sub(p$data)),
+    labels = mol_subs
+  ) +
+  ggplot2::scale_fill_manual(
+    values = c(get_colors_mol_sub(p$data)),
+    labels = mol_subs
+  ) +
+  ggplot2::labs(color = "Molecular\nsubtype", title = "TCGA") 
+  
+final_plot
+```
+
+Once the plot is adjusted to what you like, you can save it directly
+using the `ggplot2::ggsave` function inside the `results` folder. 
+Alternatively, you can render your quarto markdown document. That will
+generate all the plots automatically using the figure width and height
+specified in each R chunk.
